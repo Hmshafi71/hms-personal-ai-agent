@@ -1,17 +1,47 @@
 
-const topicNames = {
-  jobs: 'بیرونِ ملک نوکریاں',
-  quran: 'HMS قرآن اکیڈمی',
-  income: 'آن لائن آمدنی'
-};
 
-let currentTopic = 'jobs';
+const topicNames = {
+  jobs: 'Overseas jobs',
+  quran: 'HMS Quran Academy',
+  income: 'Online income'
+};
 
 const $ = selector => document.querySelector(selector);
 const log = $('#chatLog');
 const chatForm = $('#chatForm');
 const userInput = $('#userInput');
 const sendButton = chatForm.querySelector('button[type="submit"]');
+const languageSelect = $('#languageSelect');
+
+let currentTopic = null;
+
+const languages = {
+  auto: 'the same language as the user’s question',
+  ur: 'Urdu, using Pakistani Urdu script',
+  en: 'English',
+  ar: 'Arabic',
+  hi: 'Hindi',
+  fr: 'French',
+  de: 'German',
+  es: 'Spanish',
+  zh: 'Chinese',
+  ja: 'Japanese',
+  other: 'the language used in the user’s question'
+};
+
+const speechLanguages = {
+  ur: 'ur-PK',
+  en: 'en-US',
+  ar: 'ar-SA',
+  hi: 'hi-IN',
+  fr: 'fr-FR',
+  de: 'de-DE',
+  es: 'es-ES',
+  zh: 'zh-CN',
+  ja: 'ja-JP',
+  auto: 'ur-PK',
+  other: 'ur-PK'
+};
 
 function addMessage(text, type = 'agent') {
   const bubble = document.createElement('div');
@@ -30,7 +60,7 @@ function addMessage(text, type = 'agent') {
   return paragraph;
 }
 
-// شعبہ منتخب کریں
+// شعبہ صرف اسی وقت منتخب ہوگا جب صارف خود منتخب کرے
 document.querySelectorAll('.module').forEach(button => {
   button.addEventListener('click', () => {
     document.querySelectorAll('.module').forEach(item => {
@@ -39,11 +69,10 @@ document.querySelectorAll('.module').forEach(button => {
 
     button.classList.add('active');
     currentTopic = button.dataset.topic;
-    $('#topicLabel')?.textContent;
   });
 });
 
-// مائیک کا بٹن شامل کریں
+// مائیک
 const micButton = document.createElement('button');
 micButton.type = 'button';
 micButton.textContent = '🎙️ بولیں';
@@ -57,11 +86,20 @@ let isListening = false;
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
 
+function updateSpeechLanguage() {
+  if (recognition) {
+    recognition.lang =
+      speechLanguages[languageSelect?.value || 'auto'] || 'ur-PK';
+  }
+}
+
 if (SpeechRecognition) {
   recognition = new SpeechRecognition();
-  recognition.lang = 'ur-PK';
   recognition.continuous = false;
   recognition.interimResults = false;
+  updateSpeechLanguage();
+
+  languageSelect?.addEventListener('change', updateSpeechLanguage);
 
   recognition.onstart = () => {
     isListening = true;
@@ -69,15 +107,12 @@ if (SpeechRecognition) {
   };
 
   recognition.onresult = event => {
-    const spokenText = event.results[0][0].transcript;
-    userInput.value = spokenText;
+    userInput.value = event.results[0][0].transcript;
     userInput.focus();
   };
 
   recognition.onerror = () => {
-    addMessage(
-      'مائیک استعمال نہیں ہو سکا۔ براؤزر کی مائیک اجازت چیک کریں، یا سوال لکھ کر بھیجیں۔'
-    );
+    addMessage('مائیک استعمال نہیں ہو سکا۔ اجازت چیک کریں یا سوال لکھ کر بھیجیں۔');
   };
 
   recognition.onend = () => {
@@ -91,21 +126,21 @@ if (SpeechRecognition) {
       return;
     }
 
+    updateSpeechLanguage();
+
     try {
       recognition.start();
     } catch {
-      addMessage('مائیک دوبارہ استعمال کرنے سے پہلے ایک لمحہ انتظار کریں۔');
+      addMessage('مائیک دوبارہ شروع کرنے سے پہلے ایک لمحہ انتظار کریں۔');
     }
   });
 } else {
   micButton.addEventListener('click', () => {
-    addMessage(
-      'آپ کے موجودہ براؤزر میں آواز پہچاننے کی سہولت دستیاب نہیں۔ براہِ کرم سوال لکھ کر بھیجیں۔'
-    );
+    addMessage('اس براؤزر میں مائیک کی سہولت دستیاب نہیں۔ سوال لکھ کر بھیجیں۔');
   });
 }
 
-// اصل AI کو پیغام بھیجیں
+// AI سے رابطہ
 chatForm.addEventListener('submit', async event => {
   event.preventDefault();
 
@@ -118,42 +153,81 @@ chatForm.addEventListener('submit', async event => {
 
   const pending = addMessage('جواب تیار ہو رہا ہے، براہِ کرم انتظار کریں۔');
 
+  const selectedLanguage = languageSelect?.value || 'auto';
+  const languageInstruction =
+    languages[selectedLanguage] || languages.auto;
+
+  let prompt =
+    'You are HMS Personal AI Agent. Reply in ' +
+    languageInstruction +
+    '. Be concise, accurate, and relevant. Do not add unrelated suggestions. ';
+
+  if (currentTopic) {
+    prompt += 'The user selected this topic: ' +
+      topicNames[currentTopic] + '. ';
+  }
+
+  prompt += 'User question: ' + question;
+
   try {
-    const response = await fetch(
-      'https://hms-personal-ai-agent.hmscareerdesk.workers.dev/',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          message:
-            'آپ HMS Personal AI Agent ہیں۔ منتخب شعبہ: ' +
-            topicNames[currentTopic] +
-            '۔ صارف کا سوال: ' + question +
-            '۔ صارف کی زبان کے مطابق جواب دیں۔ اردو میں پوچھا جائے تو اردو رسم الخط میں جواب دیں۔'
-        })
+    let response;
+    let data;
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 45000);
+
+        try {
+          response = await fetch(
+            'https://hms-personal-ai-agent.hmscareerdesk.workers.dev/',
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: prompt }),
+              signal: controller.signal
+            }
+          );
+        } finally {
+          clearTimeout(timeout);
+        }
+
+        const raw = await response.text();
+
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          throw new Error('سرور سے درست جواب موصول نہیں ہوا۔');
+        }
+
+        if (!response.ok) {
+          throw new Error(data.error || 'AI درخواست مکمل نہیں ہوئی۔');
+        }
+
+        break;
+      } catch (error) {
+        if (attempt === 1) throw error;
+        await new Promise(resolve => setTimeout(resolve, 800));
       }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'درخواست مکمل نہیں ہوئی۔');
     }
 
-    const answer = data.choices?.[0]?.message?.content;
+    const answer =
+      data?.choices?.[0]?.message?.content ||
+      data?.response ||
+      data?.result?.response;
 
-    if (!answer) {
-      throw new Error('AI کا جواب موصول نہیں ہوا۔');
+    if (typeof answer !== 'string' || !answer.trim()) {
+      throw new Error('AI کا جواب خالی موصول ہوا۔');
     }
 
-    pending.textContent = answer;
+    pending.textContent = answer.trim();
   } catch (error) {
-    pending.textContent =
-      'معذرت، AI سے رابطہ نہیں ہو سکا۔ انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں۔';
-
     console.error('HMS AI connection error:', error);
+
+    pending.textContent =
+      error.name === 'AbortError'
+        ? 'جواب آنے میں زیادہ وقت لگ رہا ہے۔ براہِ کرم دوبارہ کوشش کریں۔'
+        : 'AI سے رابطہ نہیں ہو سکا۔ انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں۔';
   } finally {
     sendButton.disabled = false;
     userInput.focus();
@@ -163,10 +237,7 @@ chatForm.addEventListener('submit', async event => {
 // چیٹ صاف کریں
 $('#clearChat')?.addEventListener('click', () => {
   log.innerHTML = '';
-
-  addMessage(
-    'وعلیکم السلام! میں HMS Personal AI Agent ہوں۔ اپنا سوال لکھیں یا مائیک سے بولیں۔'
-  );
+  addMessage('السلام علیکم! اپنا سوال لکھیں یا مائیک سے بولیں۔');
 });
 
 // کاموں کی فہرست
@@ -188,7 +259,7 @@ function saveTasks() {
   try {
     localStorage.setItem('hmsTasks', JSON.stringify(tasks));
   } catch {
-    addMessage('کام محفوظ نہیں ہو سکا۔ اپنے براؤزر کی اسٹوریج چیک کریں۔');
+    addMessage('کام محفوظ نہیں ہو سکا۔ براؤزر کی اسٹوریج چیک کریں۔');
   }
   renderTasks();
 }
