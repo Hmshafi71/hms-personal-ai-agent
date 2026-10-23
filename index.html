@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="ur" dir="rtl">
 <head>
@@ -15,7 +16,7 @@
     <div class="brand-mark">HMS</div>
     <div class="brand-text">
       <h1>HMS Personal AI Agent</h1>
-      <p>آپ کا ذاتی معاون</p>
+      <p id="subtitle">آپ کا ذاتی معاون</p>
     </div>
     <button id="installBtn" class="install-btn" hidden>ایپ انسٹال کریں</button>
   </header>
@@ -23,62 +24,89 @@
   <main>
     <section class="welcome card">
       <span class="eyebrow">بسم اللہ الرحمن الرحیم</span>
-      <h2>السلام علیکم!</h2>
-      <p>یہ آپ کے تین اہم کاموں کے لیے ایک جگہ ہے۔ نیچے سے شعبہ منتخب کریں یا اپنا سوال لکھیں۔</p>
-      <div class="status-note">ابتدائی ایپ پروٹوٹائپ — AI چیٹ کنکشن ابھی منسلک نہیں ہے۔</div>
+      <h2 id="welcomeTitle">السلام علیکم!</h2>
+      <p id="welcomeText">اپنا شعبہ اور جواب کی زبان منتخب کریں، پھر اپنا سوال لکھیں یا بولیں۔</p>
+    </section>
+
+    <section class="card">
+      <label for="languageSelect"><b>جواب کی زبان / Response language</b></label>
+      <select id="languageSelect">
+        <option value="auto">خودکار / Automatic</option>
+        <option value="ur">اردو</option>
+        <option value="en">English</option>
+        <option value="ar">العربية</option>
+        <option value="hi">हिन्दी</option>
+        <option value="fr">Français</option>
+        <option value="de">Deutsch</option>
+        <option value="es">Español</option>
+        <option value="zh">中文</option>
+        <option value="ja">日本語</option>
+        <option value="other">دوسری زبان / Other</option>
+      </select>
     </section>
 
     <section class="modules" aria-label="شعبے">
       <button class="module" data-topic="jobs">
-        <span class="module-icon">🌍</span><span><b>بیرونِ ملک نوکریاں</b><small>تصدیق، شرائط، درخواست کے مراحل</small></span><span class="arrow">←</span>
+        <span class="module-icon">🌍</span>
+        <span><b>بیرونِ ملک نوکریاں</b><small>تصدیق اور درخواست کی رہنمائی</small></span>
+        <span class="arrow">←</span>
       </button>
       <button class="module" data-topic="quran">
-        <span class="module-icon">📖</span><span><b>HMS قرآن اکیڈمی</b><small>طلبہ، تدریس، پروفائل اور تشہیر</small></span><span class="arrow">←</span>
+        <span class="module-icon">📖</span>
+        <span><b>HMS قرآن اکیڈمی</b><small>تدریس، طلبہ اور تشہیر</small></span>
+        <span class="arrow">←</span>
       </button>
       <button class="module" data-topic="income">
-        <span class="module-icon">💼</span><span><b>آن لائن آمدنی</b><small>بغیر پیشگی فیس کے مواقع</small></span><span class="arrow">←</span>
+        <span class="module-icon">💼</span>
+        <span><b>آن لائن آمدنی</b><small>قانونی اور کم خرچ مواقع</small></span>
+        <span class="arrow">←</span>
       </button>
     </section>
 
     <section class="card chat-card">
       <div class="section-heading">
-        <div><h2>ایجنٹ سے بات کریں</h2><p>اپنا سوال یا اگلا کام لکھیں</p></div>
+        <div>
+          <h2>ایجنٹ سے بات کریں</h2>
+          <p>سوال لکھیں یا مائیک سے بولیں</p>
+        </div>
         <button id="clearChat" class="text-btn" type="button">چیٹ صاف کریں</button>
       </div>
+
       <div id="chatLog" class="chat-log" aria-live="polite">
-        <div class="bubble agent"><b>HMS ایجنٹ</b><p>وعلیکم السلام! میں آپ کے سوال کو متعلقہ شعبے کے مطابق ترتیب دینے میں مدد کر سکتا ہوں۔ اصل AI جواب کے لیے اس پروٹوٹائپ کو بعد میں AI سروس سے جوڑنا ہوگا۔</p></div>
+        <div class="bubble agent">
+          <b>HMS ایجنٹ</b>
+          <p>السلام علیکم! اپنا سوال لکھیں یا بولیں۔</p>
+        </div>
       </div>
+
       <form id="chatForm" class="chat-form">
-        <textarea id="userInput" rows="2" placeholder="مثلاً: میرے لیے تصدیق شدہ ایڈمن نوکریاں تلاش کریں..." required></textarea>
+        <textarea id="userInput" rows="2" placeholder="اپنا سوال یہاں لکھیں..." required></textarea>
         <button type="submit">بھیجیں</button>
       </form>
-      <p class="fineprint">یہ ڈیمو آپ کا پیغام اسی ڈیوائس پر دکھاتا ہے؛ ابھی پیغام کسی AI یا انسان کو نہیں بھیجا جاتا۔</p>
     </section>
 
     <section class="card tasks-card">
       <div class="section-heading">
-        <div><h2>کاموں کی فہرست</h2><p>آپ کے موبائل میں محفوظ رہے گی</p></div>
+        <div>
+          <h2>کاموں کی فہرست</h2>
+          <p>آپ کے موبائل میں محفوظ رہے گی</p>
+        </div>
       </div>
       <form id="taskForm" class="task-form">
         <input id="taskInput" type="text" placeholder="نیا کام درج کریں..." required>
         <select id="taskCategory" aria-label="کام کا شعبہ">
-          <option value="عمومی">عمومی</option><option value="نوکریاں">نوکریاں</option><option value="قرآن اکیڈمی">قرآن اکیڈمی</option><option value="آن لائن آمدنی">آن لائن آمدنی</option>
+          <option value="عمومی">عمومی</option>
+          <option value="نوکریاں">نوکریاں</option>
+          <option value="قرآن اکیڈمی">قرآن اکیڈمی</option>
+          <option value="آن لائن آمدنی">آن لائن آمدنی</option>
         </select>
         <button type="submit">شامل کریں</button>
       </form>
       <ul id="taskList" class="task-list"></ul>
     </section>
-
-    <section class="card next-steps">
-      <h2>اگلا مرحلہ</h2>
-      <ol>
-        <li>اس پروٹوٹائپ کو HTTPS ویب ہوسٹنگ پر شائع کرنا۔</li>
-        <li>اسے موبائل کی ہوم اسکرین پر انسٹال کرنا۔</li>
-        <li>محفوظ AI API، لاگ اِن اور حقیقی سرچ/ڈیٹا کنکشن شامل کرنا۔</li>
-      </ol>
-    </section>
   </main>
-  <footer>HMS Personal AI Agent · ابتدائی ورژن 0.1</footer>
-  <script src="app.js"></script>
+
+  <footer>HMS Personal AI Agent</footer>
+  <script src="app.js?v=7"></script>
 </body>
 </html>
