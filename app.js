@@ -221,13 +221,14 @@ chatForm.addEventListener('submit', async event => {
     }
 
     pending.textContent = answer.trim();
-  } catch (error) {
+    } catch (error) {
     console.error('HMS AI connection error:', error);
 
     pending.textContent =
-      error.name === 'AbortError'
-        ? 'جواب آنے میں زیادہ وقت لگ رہا ہے۔ براہِ کرم دوبارہ کوشش کریں۔'
-        : 'AI سے رابطہ نہیں ہو سکا۔ انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں۔';
+      'خرابی کی تفصیل: ' +
+      (error.name === 'AbortError'
+        ? 'درخواست کا وقت ختم ہوگیا۔'
+        : error.message || String(error));
   } finally {
     sendButton.disabled = false;
     userInput.focus();
