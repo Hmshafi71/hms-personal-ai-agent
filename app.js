@@ -157,17 +157,33 @@ chatForm.addEventListener('submit', async event => {
   const languageInstruction =
     languages[selectedLanguage] || languages.auto;
 
-  let prompt =
-    'You are HMS Personal AI Agent. Reply in ' +
-    languageInstruction +
-    '. Be concise, accurate, and relevant. Do not add unrelated suggestions. ';
+  
+const languageRules = {
+  auto: 'Detect the language of the user question and reply in that same language.',
+  ur: 'Reply ONLY in Pakistani Urdu. Use Urdu script, correct spelling, natural grammar, and complete sentences. Do not use Hindi or Devanagari.',
+  en: 'Reply ONLY in English. Do not use Urdu or other languages.',
+  ar: 'Reply ONLY in Arabic.',
+  hi: 'Reply ONLY in Hindi using Devanagari script.',
+  fr: 'Reply ONLY in French.',
+  de: 'Reply ONLY in German.',
+  es: 'Reply ONLY in Spanish.',
+  zh: 'Reply ONLY in Chinese.',
+  ja: 'Reply ONLY in Japanese.',
+  other: 'Reply in the same language as the user question.'
+};
 
-  if (currentTopic) {
-    prompt += 'The user selected this topic: ' +
-      topicNames[currentTopic] + '. ';
-  }
+let prompt =
+  'You are HMS Personal AI Agent. ' +
+  (languageRules[selectedLanguage] || languageRules.auto) +
+  ' Answer the exact question accurately. ' +
+  'Do not invent words, mix languages, or add unrelated content. ' +
+  'Give a complete answer. ';
 
-  prompt += 'User question: ' + question;
+if (currentTopic) {
+  prompt += 'Selected topic: ' + topicNames[currentTopic] + '. ';
+}
+
+prompt += 'User question: ' + question;
 
   try {
     let response;
